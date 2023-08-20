@@ -6,7 +6,7 @@ import { useState ,useEffect} from 'react'
 
 const data =require ("../app/components/constants/data")
 import ProgressBarComponent from './components/Progressbar/Progressbar'
-export default function index() {
+export default function Index() {
   
   const [agitation,setagitation]=useState(0)
   const [end,setEnd]=useState(false)
