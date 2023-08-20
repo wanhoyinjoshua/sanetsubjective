@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './ProgressBar.css'; // Import the CSS file for styling
+import '../Progressbar/ProgressBar.css'; // Import the CSS file for styling
 
 export default function ProgressBarComponent(props:any) {
   const [progress, setProgress] = useState(0); // Initial progress value is 0
