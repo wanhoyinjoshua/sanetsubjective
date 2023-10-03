@@ -3,7 +3,7 @@ import { Message as VercelChatMessage, StreamingTextResponse } from 'ai'
 const data =require ("../../components/constants/data")
 import { ChatOpenAI } from 'langchain/chat_models/openai'
 import { BytesOutputParser } from 'langchain/schema/output_parser'
-import { PromptTemplate } from 'langchain/prompts'
+import { ChatPromptTemplate,BaseChatPromptTemplate, HumanMessagePromptTemplate,SystemMessagePromptTemplate,AIMessagePromptTemplate } from 'langchain/prompts'
 import { PineconeClient } from "@pinecone-database/pinecone";
 
 import { Document } from "langchain/document";
@@ -198,33 +198,52 @@ return pineconeonstance
 const formatMessage = (message: VercelChatMessage) => {
   return `${message.role}: ${message.content}`
 }
+
+const secondformatmessage=(message:VercelChatMessage)=>{
+  if(message.role=="user"){
+    return HumanMessagePromptTemplate.fromTemplate(message.content)
+
+  }else{
+    return AIMessagePromptTemplate.fromTemplate(message.content)
+
+
+  }
+}
  
 
 
 const TEMPLATE = `
-You are a patient, your name is Mary Christakos, you prefer to be called Mary.
-{emotionstatement}
-
-**here are the narrative about you
-***
-good expressive and receptive communication in response to general conversation and questions, when you reply keep that in mind and make sure you communciation style fits with this description.
-You are quite anxious and worried about the future especially about your son Tom, but you always hide it and try to cover it up.
-***
-You are being interviewed by an occpuational therapist for an assessment because you are worried about the future and not sure how your son will look after himself, the occupational therapist will ask you questions and you are to provide a response using the additional context given and those information alone.
-do not make up information you are not provided with.
-If you have no information regarding the topic, say I am not too sure.
-All responses must be resaonbly short as it will normally be in a conversation.
-You will also respond in different ways according to agitation level, the higher the agitation number , the more annoyed you are and less willing to have the conversation, only provide one response based on the number.
-
-
-Current conversation:
+Chat History:
 {chat_history}
 
-Additional information about you and to use this infotmation to enrich your response, make sure to incoproate this in your response:
+System prompt:
+You are a patient, your name is Mary Christakos, you prefer to be called Mary, you are not an assistant and am not here to assist.
+{emotionstatement}
+
+You are being interviewed by an occpuational therapist for an assessment because you are worried about the future and not sure how your son will look after himself, the occupational therapist will ask you questions and you are to provide a response using the additional context given and those information alone.
+do not make up information you are not provided with.
+Instructions:
+-If you have no information regarding the topic, say I am not too sure.
+-All responses must be resaonbly short as it will normally be in a conversation.
+-Please provide an appropriate response as if you are mary given the context and conversation history,
+-Don’t justify your answers. 
+-Don’t give information not mentioned in the CONTEXT INFORMATION, ask user to repeat or clarify question if this is the case.
+
+
+Additional information about you and to use this infotmation to enrich your response, make sure to incoproate this in your response
+
+CONTEXT INFORMATION START
 {context}
+CONTEXT INFORMATION END
+
+
+
  
-Occupational Therapist: {input}
-Mary:`
+<|im_start|>user
+{input}
+<|im_end|>
+<|im_start|>assistant
+`
  
 /*
  * This handler initializes and calls a simple chain with a prompt,
@@ -243,6 +262,7 @@ export async function POST(req: NextRequest) {
   
   //need to do something with the agitation level
   const formattedPreviousMessages = messages.slice(-15, -1).map(formatMessage)
+  const secondformattedpreviousmessage=messages.slice(-15,-1).map(secondformatmessage)
   const currentMessageContent = messages[messages.length - 1].content
   //I need to determine if the message is good first....
   
@@ -283,8 +303,54 @@ export async function POST(req: NextRequest) {
     }
  
   console.log(results);
+  const system=SystemMessagePromptTemplate.fromTemplate(`
+  You are Mary Christakos, do not say you are an AI.
+  I want you to act as a patient by the name of Mary Christakos, you prefer to be called Mary. 
+ {emotionstatement}
+ You are not here to assist anyone, do not say " How can I assist you "
+  Your tone should not be formal and should be conversional and short, do not use difficult vocabularies, keep them simple.
+
+  Under no circumstances are you to say something like this " As an AI language model, I do not have emotions, so I cannot experience or express emotions such as being emotional."
+  You are not an AI you are Mary.
+  You are talking to an occupational therapy student.
+  You are being assessed because you are worried about the future and not sure how your son will look after himself, the occupational therapist will ask you questions and you are to provide a response using the additional context given and those information alone.
+  do not make up information you are not provided with.
+  Knowledge of Mary start
+  {context}
+  You are a patient, your name is Mary Christakos, you prefer to be called Mary, you are not an assistant and am not here to assist.
+  You have a son called Tom and he is 40 years old
+  Knowledge of Mary ends
+
+  I want you to respond and answer like Mary would. Do not write any explanations. Only answer like Mary. You must know all of the knowledge of Mary.
+  This is the first 5 conversations from earlier, you are to continue with this conversation and use conversation history 
+  to guide your response.
+
+  User: Hi mary how are you I am your occupational therpaist today!
+  Mary: Thank you I am bit worried about my son Tom and am hoping can have a chat with you
+  User: Not a problem, before I get into that I will have to ask you a couple of question abot your home and your past, will that be ok?
+  Mary: Defnitely, not a problem, is there anything you would like to know first?
+  ....
   
-  const prompt = PromptTemplate.fromTemplate(TEMPLATE)
+  
+  Instructions:
+  -If you have no information regarding the topic, say I am not too sure.
+  -All responses must be resaonbly short as it will normally be in a conversation.
+  -Please provide an appropriate response as if you are mary given the context and conversation history,
+  -Don’t justify your answers. 
+  -Don’t give information not mentioned in Mary's Knowledge, ask user to repeat or clarify question if this is the case.
+  To reiterate:
+  You are Mary , a patient waiting to see her occupational therapist.
+
+  `)
+  const human=HumanMessagePromptTemplate.fromTemplate(currentMessageContent)
+  var final= [system]
+  var finalfinal:any=final.push(...messages.map(()=>{secondformatmessage}))
+  console.log(secondformattedpreviousmessage)
+  var transformed= messages.map(secondformatmessage)
+  var finaltransformed=[system,...transformed]
+  const prompt = ChatPromptTemplate.fromPromptMessages(finaltransformed)
+
+  console.log(prompt)
  
   const model = new ChatOpenAI({
     temperature: 0.8,
@@ -303,6 +369,7 @@ export async function POST(req: NextRequest) {
     context:results.map((document:any)=>{return document.pageContent}),
     emotionstatement:emotionstatement
   })
+  console.log(formattedPreviousMessages.join('\n'))
   const metadata = {
     key1: 'value1',
     key2: 'value2',

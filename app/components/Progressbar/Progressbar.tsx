@@ -16,7 +16,7 @@ export default function ProgressBarComponent(props:any) {
           style={{ width: `${props.progress}%`,backgroundColor:props.progress>50?"orange":"#007bff" }} // Set the width of the progress bar based on the progress value
         ></div>
       </div>
-      <button onClick={incrementProgress}>Increase Progress</button>
+      
     </div>
   );
 }
