@@ -7,6 +7,7 @@ import Recording from '../components/modals/Recording';
 const data =require ("../../app/components/constants/data")
 import ProgressBarComponent from '.././components/Progressbar/Progressbar'
 export default function Index() {
+  if (typeof window !== 'undefined') {
   const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
   const [paused,isPause]=useState(false)
   recognition.continuous = false;
@@ -78,6 +79,7 @@ setConfirmedInfo(combinedList)
 
 }
 function terminate_session(){
+  if (typeof window !== 'undefined') {
   const speechSynth = window.speechSynthesis;
   speechSynth.cancel();
   localStorage.setItem('confirmedinfo', JSON.stringify(confirmedinfo));
@@ -86,6 +88,7 @@ function terminate_session(){
 
 
   router.push(`/results-page`)
+  }
 
 
 }
@@ -199,7 +202,9 @@ const confirmhosadmissioncatno= sampleanswer.data.filter((doc)=>doc.metadata.cat
 const confirmhomeenvcatno= sampleanswer.data.filter((doc)=>doc.metadata.category=="home environment"&&confirmedinfo.includes(doc.metadata.id)).length
 
 const handleConvert = () => {
+  if (typeof window !== 'undefined') {
   window.print();
+  }
 };
 
 function stopSpeechRecognition() {
@@ -429,4 +434,5 @@ async function startaudio(){
       
     </div>
   )
+}
 }
