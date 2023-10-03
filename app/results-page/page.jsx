@@ -118,13 +118,13 @@ const page = () => {
       Transcript:
       <section>
         {JSON.parse(window.localStorage.getItem('data')).map(e=>
-          <div>
-            <div className={e.role=="user"?"bg-slate-200":""}>
+          <div key={e.role}>
+            <div className={e.role=="user"?"bg-slate-200":""} key={e.role}>
             {e.role}:
 
             </div>
             
-            <div className={e.role=="user"?"bg-slate-200":""}>
+            <div className={e.role=="user"?"bg-slate-200":""} key={e.role}>
             {e.content}:
 
             </div>
