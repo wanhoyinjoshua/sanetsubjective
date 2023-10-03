@@ -7,11 +7,8 @@ import Recording from '../components/modals/Recording';
 const data =require ("../../app/components/constants/data")
 import ProgressBarComponent from '.././components/Progressbar/Progressbar'
 export default function Index() {
-  
-  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
   const [paused,isPause]=useState(false)
-  recognition.continuous = false;
-  recognition.interimResults = false;
+
   const [agitation,setagitation]=useState(0)
   const [end,setEnd]=useState(false)
   const [speakingnow,isspeakingnow]=useState(false)
@@ -210,6 +207,10 @@ const handleConvert = () => {
 function stopSpeechRecognition() {
   isspeakingnow(false)
   isPause(true)
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+
+  recognition.continuous = false;
+  recognition.interimResults = false;
   recognition.abort()
   recognition.stop()
   
@@ -223,6 +224,10 @@ async function startaudio(){
     if (typeof window !== 'undefined') {
         // Your window-related operations
         // I will have to then classify does the user fit any criterias???
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+
+        recognition.continuous = false;
+        recognition.interimResults = false;
         isspeakingnow(true)
         
         
