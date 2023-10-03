@@ -1,18 +1,21 @@
 'use client'
 import React, { use } from 'react'
 import { useEffect,useState } from 'react';
-
+import { useRouter } from 'next/navigation';
 import NoSSRWrapper from"../components/dynamic"
 import { useSearchParams } from 'next/navigation'
 const search =require ("../components/constants/data")
-const page = () => {
-
+const Page = () => {
+  const router= useRouter()
   const [data,setdata]=useState()
   const searchParams = useSearchParams()
   const handleConvert = () => {
     window.print();
   };
- 
+  const refreshPage = () => {
+    
+    router.push('/casestudy')
+  };
   //const confirminfo = searchParams.get('confirmed')
   const confirminfo= JSON.parse(window.localStorage.getItem('confirmedinfo'))
   console.log(JSON.parse(window.localStorage.getItem('data')))
@@ -40,7 +43,7 @@ const page = () => {
         </br>You can download the report and share with other people.
         <br></br>
         <button className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded" onClick={handleConvert} >Generate PDF report</button>
-        <a className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"href='casestudy'>Start another Conversation</a>
+        <a className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded" onClick={refreshPage}>Start another Conversation</a>
         <h1>Personal Information</h1>
        
         {search.data.map((item) => (
@@ -135,4 +138,4 @@ const page = () => {
         }
 
 
-export default page
+export default Page
