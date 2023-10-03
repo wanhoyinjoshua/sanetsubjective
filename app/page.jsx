@@ -11,7 +11,7 @@ const Page = () => {
         Subjective Examination Simulator
       </h2>
 
-      <p className="hidden text-gray-500 sm:mt-4 sm:block">
+      <p className="text-gray-500 sm:mt-4 sm:block">
        This tool aims to transform the case study experience, from a passive reading approach to an active question based approach to obtain background infomration for a case study.
        This tool is now open to user testing.
        <br></br>
