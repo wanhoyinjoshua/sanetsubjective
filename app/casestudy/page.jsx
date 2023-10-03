@@ -7,7 +7,7 @@ import Recording from '../components/modals/Recording';
 const data =require ("../../app/components/constants/data")
 import ProgressBarComponent from '.././components/Progressbar/Progressbar'
 export default function Index() {
-  if (typeof window !== 'undefined') {
+  
   const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
   const [paused,isPause]=useState(false)
   recognition.continuous = false;
@@ -434,5 +434,4 @@ async function startaudio(){
       
     </div>
   )
-}
 }
